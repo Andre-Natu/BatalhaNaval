@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane fx:id="painelCena" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="648.0" prefWidth="972.0" stylesheets="@estilo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.batalhanaval.Controller">
+   <children>
+      <Label fx:id="tituloLabel" layoutY="112.0" maxWidth="-Infinity" prefWidth="972.0" text="Batalha Naval 2000" />
+      <Button layoutX="336.0" layoutY="430.0" mnemonicParsing="false" onAction="#trocaParaEntrarJogo" prefHeight="60.0" prefWidth="300.0" text="Entrar em sala" />
+      <Button layoutX="336.0" layoutY="490.0" mnemonicParsing="false" onAction="#exit" prefHeight="60.0" prefWidth="300.0" text="Sair" />
+      <Button layoutX="336.0" layoutY="370.0" mnemonicParsing="false" onAction="#trocaParaCriarSala" prefHeight="60.0" prefWidth="300.0" text="Criar Sala" />
+   </children>
+</AnchorPane>
