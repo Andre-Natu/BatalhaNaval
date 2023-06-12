@@ -32,6 +32,7 @@ public class Controller {
     }
 
     public void trocaParaCriarSala(ActionEvent evento) throws IOException {
+
         root = FXMLLoader.load(Main.class.getResource("CriarSala.fxml"));
         palco = (Stage)((Node)evento.getSource()).getScene().getWindow();
         cena = new Scene(root);

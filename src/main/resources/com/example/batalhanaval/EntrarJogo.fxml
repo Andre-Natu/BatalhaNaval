@@ -7,10 +7,12 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="648.0" prefWidth="972.0" stylesheets="@estilo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.batalhanaval.ControllerEntrarJogo">
    <children>
-      <Label fx:id="tituloLabel" layoutY="112.0" maxWidth="-Infinity" prefWidth="972.0" text="Batalha Naval 2000" />
-      <Button layoutX="336.0" layoutY="512.0" mnemonicParsing="false" onAction="#trocaParaMenu" prefHeight="60.0" prefWidth="300.0" text="Voltar para o menu" />
-      <TextField fx:id="id" layoutX="336.0" layoutY="294.0" prefHeight="60.0" prefWidth="300.0" promptText="Nome do usuário" />
-      <TextField layoutX="336.0" layoutY="354.0" prefHeight="60.0" prefWidth="300.0" promptText="Código da sala" />
-      <Button layoutX="336.0" layoutY="414.0" mnemonicParsing="false" prefHeight="60.0" prefWidth="300.0" text="Entrar na sala" />
+      <Label fx:id="tituloLabel" layoutY="45.0" maxWidth="-Infinity" prefWidth="972.0" text="Batalha Naval 2000" />
+      <Button layoutX="336.0" layoutY="561.0" mnemonicParsing="false" onAction="#trocaParaMenu" prefHeight="60.0" prefWidth="300.0" text="Voltar para o menu" />
+      <TextField fx:id="nickname" layoutX="336.0" layoutY="294.0" prefHeight="60.0" prefWidth="300.0" promptText="Nome do usuário" />
+      <TextField fx:id="ip" layoutX="336.0" layoutY="354.0" prefHeight="60.0" prefWidth="300.0" promptText="Ip do host" />
+      <Button layoutX="336.0" layoutY="474.0" mnemonicParsing="false" onAction="#entrarSala" prefHeight="60.0" prefWidth="300.0" text="Entrar na sala" />
+      <TextField fx:id="porta" layoutX="336.0" layoutY="414.0" prefHeight="60.0" prefWidth="300.0" promptText="Porta do host" />
+      <Label fx:id="mensagem" layoutY="221.0" prefWidth="972.0" />
    </children>
 </AnchorPane>
