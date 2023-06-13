@@ -1,5 +1,6 @@
 package com.example.batalhanaval;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -48,16 +49,17 @@ public class ControllerEntrarJogo {
                 if (client.iniciarNetwork(valorIp, valorPorta)) {
                     FXMLLoader load = new FXMLLoader(Main.class.getResource("BatalhaNaval.fxml"));
                     root = load.load();
+
                     ControllerBatalhaNaval controllerBatalhaNaval = load.getController();
+                    controllerBatalhaNaval.receberCliente(client);
+
                     client.setControllerBatalhaNaval(controllerBatalhaNaval);
 
                     // Enviar mensagem para a classe ClientNetwork
                     client.enviarMensagem("oponente é: " + nomeNickname);
 
-                    // Atualizar a label na classe ControllerBatalhaNaval
-                    //controllerBatalhaNaval.atualizar(nomeNickname);
-
                     palco = (Stage) ((Node) evento.getSource()).getScene().getWindow();
+
                     cena = new Scene(root);
                     palco.setScene(cena);
                     palco.show();

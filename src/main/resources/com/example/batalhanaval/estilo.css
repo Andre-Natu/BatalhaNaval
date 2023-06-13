@@ -13,6 +13,7 @@
 
 .label {
     -fx-font-size: 30;
+    -fx-font-weight: bold;
     -fx-font-family: "Monospace";
     -fx-text-fill: #FFFFFF;
     -fx-alignment: center;

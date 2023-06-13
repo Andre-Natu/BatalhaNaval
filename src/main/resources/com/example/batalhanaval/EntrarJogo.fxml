@@ -5,7 +5,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="648.0" prefWidth="972.0" stylesheets="@estilo.css" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.batalhanaval.ControllerEntrarJogo">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="648.0" prefWidth="972.0" stylesheets="@estilo.css" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.batalhanaval.ControllerEntrarJogo">
    <children>
       <Label fx:id="tituloLabel" layoutY="45.0" maxWidth="-Infinity" prefWidth="972.0" text="Batalha Naval 2000" />
       <Button layoutX="336.0" layoutY="561.0" mnemonicParsing="false" onAction="#trocaParaMenu" prefHeight="60.0" prefWidth="300.0" text="Voltar para o menu" />

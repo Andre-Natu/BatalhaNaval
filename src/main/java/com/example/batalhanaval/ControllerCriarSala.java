@@ -47,10 +47,12 @@ public class ControllerCriarSala {
             } else {
                 //chama o metodo de criar servidor, e se retornar true, troca de cena
                 if(server.iniciarNetwork(valorIp, valorPorta)) {
-                    //server.enviarMensagem(nomeNickname);
                     FXMLLoader load = new FXMLLoader(Main.class.getResource("BatalhaNaval.fxml"));
                     root = load.load();
+
                     ControllerBatalhaNaval controllerBatalhaNaval = load.getController();
+                    controllerBatalhaNaval.receberServidor(server);
+
                     server.setControllerBatalhaNaval(controllerBatalhaNaval, "oponente é: " + nomeNickname);
 
                     palco = (Stage) ((Node) evento.getSource()).getScene().getWindow();
