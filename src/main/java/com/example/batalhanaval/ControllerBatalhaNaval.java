@@ -55,7 +55,8 @@ public class ControllerBatalhaNaval {
 
     public void trocaParaColocarNavios(ActionEvent evento) throws IOException, InterruptedException {
         iniciarTabuleiro();
-        servidor.enviarMensagem("iniciarTabuleiro");
+        Dados dados = new Dados (2,"iniciarTabuleiro");
+        servidor.enviarDados(dados);
     }
 
     public void iniciarTabuleiro() throws IOException, InterruptedException {

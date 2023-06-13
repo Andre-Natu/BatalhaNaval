@@ -15,8 +15,6 @@ public class ServerNetwork implements Runnable {
     // Variáveis de conexão
     private Thread thread;
     private Socket socket;
-    private DataOutputStream enviar;
-    private DataInputStream entrada;
     private ObjectOutputStream enviarObjeto;
     private ObjectInputStream entradaObjeto;
     private ServerSocket serverSocket;
@@ -64,27 +62,33 @@ public class ServerNetwork implements Runnable {
 
         if (!incapazDeComunicarComOponente) {
             try {
-                if (entrada != null) {
-                    // Receber mensagens de texto
-                    String mensagem = receberMensagem();
-                    System.out.println("Mensagem recebida: " + mensagem);
-                    if (mensagem.startsWith("oponente é: ")) {
-                        // Atualizar o controlador com a mensagem recebida
-                        controllerBatalhaNaval.atualizar(mensagem);
-                        enviarMensagem(nomeUsuario);
-                        controllerBatalhaNaval.mostrarBotao();
-                    }
-                }
-
                 if (entradaObjeto != null) {
-                    System.out.println("Objeto recebido com sucesso.");
-
-                    if (entradaObjeto.readObject() instanceof Dados) {
-                        // Receber dados de navio
-                        Dados dados = receberNavio();
-                        batalhaNavalServidor.receberNavioOponente(dados.naviosParaColocarOponente,
-                                dados.isVertical, dados.x, dados.y);
+                    Dados dados = receberDados();
+                    switch (dados.operacao) {
+                        case 1:
+                            System.out.println("Mensagem recebida: " + dados.mensagem);
+                            // Atualizar o controlador com a mensagem recebida
+                            controllerBatalhaNaval.atualizar(dados.mensagem);
+                            Dados t = new Dados(1,nomeUsuario);
+                            enviarDados(t);
+                            controllerBatalhaNaval.mostrarBotao();
+                            break;
+                        case 2:
+                            System.out.println("Não existe comando para essa operação.");
+                            break;
+                        case 3:
+                            System.out.println(dados.naviosParaColocarOponente);
+                            System.out.println(dados.isVertical);
+                            System.out.println(dados.x);
+                            System.out.println(dados.y);
+                            batalhaNavalServidor.receberNavioOponente(dados.naviosParaColocarOponente,
+                                    dados.isVertical, dados.x, dados.y);
+                            break;
+                        case 4:
+                            batalhaNavalServidor.receberTiroDoOponente(dados.x, dados.y);
+                            break;
                     }
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -98,10 +102,8 @@ public class ServerNetwork implements Runnable {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 // Aceitar a conexão do cliente
                 socket = serverSocket.accept();
-                enviar = new DataOutputStream(socket.getOutputStream());
-                entrada = new DataInputStream(socket.getInputStream());
-                enviarObjeto = new ObjectOutputStream(socket.getOutputStream());
                 entradaObjeto = new ObjectInputStream(socket.getInputStream());
+                enviarObjeto = new ObjectOutputStream(socket.getOutputStream());
                 accepted = true;
                 System.out.println("O cliente solicitou entrada e foi aceito.");
             }
@@ -136,14 +138,6 @@ public class ServerNetwork implements Runnable {
                 socket.close();
             }
 
-            if (enviar != null) {
-                enviar.close();
-            }
-
-            if (entrada != null) {
-                entrada.close();
-            }
-
             if (enviarObjeto != null) {
                 enviarObjeto.close();
             }
@@ -157,34 +151,7 @@ public class ServerNetwork implements Runnable {
         }
     }
 
-    public void enviarMensagem(String mensagem) {
-        try {
-            // Enviar mensagem de texto
-            enviar.writeUTF(mensagem);
-            enviar.flush();
-        } catch (IOException e) {
-            System.out.println(e);
-            errors++;
-        }
-    }
-
-    public String receberMensagem() {
-        try {
-            if (entrada != null) {
-                // Receber mensagem de texto
-                return entrada.readUTF();
-            } else {
-                System.out.println("O objeto DataInputStream é nulo.");
-                return null;
-            }
-        } catch (IOException e) {
-            System.out.println(e);
-            errors++;
-            return null;
-        }
-    }
-
-    public void enviarNavio(Dados dados) {
+    public void enviarDados(Dados dados) {
         try {
             // Enviar objeto de dados
             enviarObjeto.reset();
@@ -198,7 +165,7 @@ public class ServerNetwork implements Runnable {
         }
     }
 
-    public Dados receberNavio() {
+    public Dados receberDados() {
         try {
             System.out.println("dado recebido pela network com sucesso!");
             if (entradaObjeto != null) {

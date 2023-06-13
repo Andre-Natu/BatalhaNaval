@@ -27,6 +27,8 @@ public class BatalhaNavalServidor extends Application {
 
     private int naviosParaColocar = 5;
 
+    private boolean oponentePronto = false;
+    private boolean jogadorPronto = false;
     private boolean turnoInimigo = false;
     private String mensagem = "Coloque os seus navios no tabuleiro";
     private ServerNetwork servidor;
@@ -58,15 +60,18 @@ public class BatalhaNavalServidor extends Application {
 
             // atiro na celula e passo o turno pro inimigo.
             celula.atirarNaCelula();
-            turnoInimigo = true;
+            enviarTiro(celula.x,celula.y);
+
+            // lembrar de habilitar denovo
+            //turnoInimigo = true;
 
             if (tabuleiroOponente.quantidadeNavios == 0) {
                 System.out.println("Você ganhou");
                 System.exit(0);
             }
 
-            if (turnoInimigo)
-                movimentoDoOponente();
+            //if (turnoInimigo)
+                //movimentoDoOponente();
         });
 
         tabuleiroJogador = new Tabuleiro(false, event -> {
@@ -84,6 +89,7 @@ public class BatalhaNavalServidor extends Application {
                 enviarNavio(naviosParaColocar,event.getButton() == MouseButton.PRIMARY, celula.x, celula.y );
 
                 if (--naviosParaColocar == 0) {
+                    jogadorPronto = true;
                     inicarJogo();
                 }
             }
@@ -100,36 +106,11 @@ public class BatalhaNavalServidor extends Application {
         return raiz;
     }
 
-    // atualmente é utilizada para o computador realizar sua jogada.
-    private void movimentoDoOponente() {
-        while (turnoInimigo) {
-
-            // o computador escolhe uma celula aleatória
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            // pega a celula escolhida e verifica se ela já foi atirada
-            Celula celula = tabuleiroJogador.getCelula(x, y);
-            if (celula.tomouTiro)
-                continue;
-
-            celula.atirarNaCelula();
-
-            // verifica os tabuleiros do inimigo
-            if (tabuleiroJogador.quantidadeNavios == 0) {
-                System.out.println("Você Perdeu!");
-                System.exit(0);
-            }
-
-            turnoInimigo = false;
-        }
-    }
-
     // função que envia as coordenadas do navio do jogador para o oponente.
     public void enviarNavio(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
 
-        Dados dado = new Dados(naviosParaColocarOponente, isVertical, x, y);
-        servidor.enviarNavio(dado);
+        Dados dado = new Dados(3, naviosParaColocarOponente, isVertical, x, y);
+        servidor.enviarDados(dado);
         System.out.println("navio enviado com sucesso!");
     }
 
@@ -138,10 +119,23 @@ public class BatalhaNavalServidor extends Application {
         Celula celula = tabuleiroOponente.getCelula(x,y);
         if (tabuleiroOponente.colocarNavio(new Navio(naviosParaColocarOponente, isVertical), celula.x, celula.y)) {
             if (--naviosParaColocarOponente == 0) {
+                oponentePronto = true;
                 inicarJogo();
             }
             System.out.println("Navio colocado com sucesso.");
         }
+    }
+
+    public void enviarTiro(int x, int y) {
+        Dados dado = new Dados(4, x, y);
+        servidor.enviarDados(dado);
+        System.out.println("tiro enviado com sucesso!");
+    }
+
+    public void receberTiroDoOponente(int x, int y) {
+        System.out.println("Tiro recebido com sucesso");
+        Celula celula = tabuleiroJogador.getCelula(x,y);
+        celula.atirarNaCelula();
     }
 
     public void receberServidor(ServerNetwork servidor) {
@@ -149,23 +143,13 @@ public class BatalhaNavalServidor extends Application {
     }
 
     private void inicarJogo() {
-        int tamanhoNavio = 5; // é a quantidade de navios que falta para o tabuleiro inimigo.
 
-        // Computador coloca os navios no seu tabuleiro de forma aleatoria
-        while (tamanhoNavio > 0) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            // verifica se a posição aleatoria que o computador criou é válida.
-            if (tabuleiroOponente.colocarNavio(new Navio(tamanhoNavio, Math.random() < 0.5), x, y)) {
-
-                tamanhoNavio--;
-            }
+        if (jogadorPronto && oponentePronto){
+            System.out.println("O jogo começou!");
+            mensagem = "A partida começou!";
+            terminouColocarNavios = true;
         }
 
-        System.out.println("O jogo começou!");
-        mensagem = "A partida começou!";
-        terminouColocarNavios = true;
     }
 
     public void sair(Stage palco) {

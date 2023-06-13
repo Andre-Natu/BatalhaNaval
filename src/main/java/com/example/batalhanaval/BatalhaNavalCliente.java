@@ -25,7 +25,8 @@ public class BatalhaNavalCliente extends Application {
     private Tabuleiro tabuleiroOponente, tabuleiroJogador;
 
     private int naviosParaColocar = 5;
-
+    private boolean oponentePronto = false;
+    private boolean jogadorPronto = false;
     private boolean turnoInimigo = false;
     private String mensagem = "Coloque os seus navios no tabuleiro";
     private ClientNetwork cliente;
@@ -53,7 +54,10 @@ public class BatalhaNavalCliente extends Application {
 
             // atiro na celula e passo o turno pro inimigo.
             celula.atirarNaCelula();
-            turnoInimigo = true;
+            enviarTiro(celula.x,celula.y);
+
+            // lembrar de habilitar denovo
+            //turnoInimigo = true;
 
             if (tabuleiroOponente.quantidadeNavios == 0) {
                 System.out.println("Você ganhou");
@@ -79,6 +83,7 @@ public class BatalhaNavalCliente extends Application {
                 enviarNavio(naviosParaColocar,event.getButton() == MouseButton.PRIMARY, celula.x, celula.y );
 
                 if (--naviosParaColocar == 0) {
+                    jogadorPronto = true;
                     inicarJogo();
                 }
             }
@@ -121,8 +126,8 @@ public class BatalhaNavalCliente extends Application {
     // função que envia as coordenadas do navio do jogador para o oponente.
     public void enviarNavio(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
 
-        Dados dado = new Dados(naviosParaColocarOponente, isVertical, x, y);
-        cliente.enviarNavio(dado);
+        Dados dado = new Dados( 3, naviosParaColocarOponente, isVertical, x, y);
+        cliente.enviarDados(dado);
     }
 
     // função que recebe as coordenadas do navio do oponente e coloca no tabuleiro dele.
@@ -130,34 +135,38 @@ public class BatalhaNavalCliente extends Application {
         Celula celula = tabuleiroOponente.getCelula(x,y);
         if (tabuleiroOponente.colocarNavio(new Navio(naviosParaColocarOponente, isVertical), celula.x, celula.y)) {
             if (--naviosParaColocarOponente == 0) {
+                oponentePronto = true;
                 inicarJogo();
             }
             System.out.println("Navio colocado com sucesso.");
         }
     }
 
+    public void enviarTiro(int x, int y) {
+        Dados dado = new Dados(4, x, y);
+        cliente.enviarDados(dado);
+        System.out.println("tiro enviado com sucesso!");
+    }
+
+    public void receberTiroDoOponente(int x, int y) {
+        System.out.println("Tiro recebido com sucesso");
+        Celula celula = tabuleiroJogador.getCelula(x,y);
+        celula.atirarNaCelula();
+    }
+
+
     public void receberCliente(ClientNetwork cliente) {
         this.cliente = cliente;
     }
 
     private void inicarJogo() {
-        int quantidadeNavios = 5; // é a quantidade de navios que falta para o tabuleiro inimigo.
 
-        // Computador coloca os navios no seu tabuleiro de forma aleatoria
-        while (quantidadeNavios > 0) {
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            // verifica se a posição aleatoria que o computador criou é válida.
-            if (tabuleiroOponente.colocarNavio(new Navio(quantidadeNavios, Math.random() < 0.5), x, y)) {
-
-                quantidadeNavios--;
-            }
+        if (jogadorPronto && oponentePronto){
+            System.out.println("O jogo começou!");
+            mensagem = "A partida começou!";
+            terminouColocarNavios = true;
         }
 
-        System.out.println("O jogo começou!");
-        mensagem = "A partida começou!";
-        terminouColocarNavios = true;
     }
 
     public void sair(Stage palco) {

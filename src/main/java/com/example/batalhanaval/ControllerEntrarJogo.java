@@ -56,7 +56,8 @@ public class ControllerEntrarJogo {
                     client.setControllerBatalhaNaval(controllerBatalhaNaval);
 
                     // Enviar mensagem para a classe ClientNetwork
-                    client.enviarMensagem("oponente é: " + nomeNickname);
+                    Dados dados = new Dados(1,"oponente é: " + nomeNickname);
+                    client.enviarDados(dados);
 
                     palco = (Stage) ((Node) evento.getSource()).getScene().getWindow();
 
