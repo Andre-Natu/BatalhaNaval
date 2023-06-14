@@ -47,11 +47,10 @@ public class ClientNetwork implements Runnable {
     }
 
     private void tick() {
-        if (errors >= 10) {
-            incapazDeComunicarComOponente = true;
+        if (errors >= 5) {
+            close();
+            return;
         }
-
-        if (!incapazDeComunicarComOponente) {
             try {
                 if (entradaObjeto != null) {
                     Dados dados = receberDados();
@@ -75,6 +74,9 @@ public class ClientNetwork implements Runnable {
                         case 4:
                             batalhaNavalCliente.receberTiroDoOponente(dados.x, dados.y);
                             break;
+                        case 5:
+                            System.out.println("Derrota recebida com sucesso.");
+                            batalhaNavalCliente.receberDerrota();
 
                     }
                 }
@@ -82,7 +84,6 @@ public class ClientNetwork implements Runnable {
                 System.out.println(e);
                 errors++;
             }
-        }
     }
 
     private boolean conectar() {
@@ -107,7 +108,7 @@ public class ClientNetwork implements Runnable {
         try {
             // Fechar os recursos de comunicação
             if (socket != null) {
-                socket.close(); // Fecha o cliente Socket
+                socket.close(); // Fecha o Socket do cliente
             }
 
             if (enviarObjeto != null) {
@@ -118,7 +119,7 @@ public class ClientNetwork implements Runnable {
                 entradaObjeto.close(); // Fecha o ObjectInputStream
             }
 
-            System.out.println("A thread foi encerrada com sucesso");
+            System.out.println("O cliente foi encerrado com sucesso");
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -133,7 +134,7 @@ public class ClientNetwork implements Runnable {
             System.out.println("Tamanho navio:" + dados.naviosParaColocarOponente + "Posição x:"
                     + dados.x + "Posição y:" + dados.y + "É vertical:" + dados.isVertical);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Não foi possível mandar a informação, tentando novamente...");
             errors++;
         }
     }
@@ -149,7 +150,7 @@ public class ClientNetwork implements Runnable {
                 return null;
             }
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Não foi possível receber a informação, tentando novamente...");
             errors++;
             return null;
         } catch (ClassNotFoundException e) {

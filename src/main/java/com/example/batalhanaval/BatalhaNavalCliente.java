@@ -1,20 +1,27 @@
 package com.example.batalhanaval;
 
+import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
@@ -28,15 +35,17 @@ public class BatalhaNavalCliente extends Application {
     private boolean oponentePronto = false;
     private boolean jogadorPronto = false;
     private boolean turnoInimigo = false;
+    private String tituloAlertaVitoria;
+
+    private String textoAlertaVitoria;
     private String mensagem = "Coloque os seus navios no tabuleiro";
     private ClientNetwork cliente;
+    private Label texto;
     private Random random = new Random();
 
     protected Parent criarConteudo() {
         BorderPane raiz = new BorderPane();
         raiz.setPrefSize(972, 648);
-
-        raiz.setTop(new Label(mensagem));
 
         // crio um tabuleiro do oponente que ao receber o click do mouse, fará algo.
         tabuleiroOponente = new Tabuleiro(true, event -> {
@@ -44,6 +53,10 @@ public class BatalhaNavalCliente extends Application {
             // verifica se a partida começou, de forma que só é possível clicar no
             // tabuleiro inimigo depois que a partida tiver começado.
             if (!terminouColocarNavios) {
+                return;
+            }
+
+            if (turnoInimigo) {
                 return;
             }
 
@@ -56,16 +69,22 @@ public class BatalhaNavalCliente extends Application {
             celula.atirarNaCelula();
             enviarTiro(celula.x,celula.y);
 
-            // lembrar de habilitar denovo
-            //turnoInimigo = true;
+            // passo o turno para o inimigo
+            turnoInimigo = true;
+            texto.setText("É o turno do oponente.");
 
             if (tabuleiroOponente.quantidadeNavios == 0) {
-                System.out.println("Você ganhou");
-                System.exit(0);
+                if (tabuleiroOponente.quantidadeNavios == 0) {
+                    tituloAlertaVitoria = "Vitoria";
+                    textoAlertaVitoria = "Parabéns, você ganhou!";
+                    enviarDerrota();
+                    cliente.close();
+                    Platform.runLater(() -> {
+                        jogadorGanhou();
+                    });
+                }
             }
 
-            if (turnoInimigo)
-                movimentoDoOponente();
         });
 
         tabuleiroJogador = new Tabuleiro(false, event -> {
@@ -90,73 +109,164 @@ public class BatalhaNavalCliente extends Application {
         });
 
         // configurações de onde o tabuleiro será colocado.
-        HBox hbox = new HBox(100, tabuleiroOponente, tabuleiroJogador);
-        hbox.setAlignment(Pos.CENTER);
+        tabuleiroOponente.setId("tabuleiro");
+        tabuleiroJogador.setId("tabuleiro");
+        HBox hboxTabuleiro = new HBox(100, tabuleiroOponente, tabuleiroJogador);
+        hboxTabuleiro.setAlignment(Pos.CENTER);
+        hboxTabuleiro.setPadding(new Insets(-50,0,0,0));
 
-        raiz.setCenter(hbox);
+
+        texto = new Label(mensagem);
+        texto.setPrefWidth(972);
+        texto.setMaxWidth(972);
+        texto.setAlignment(Pos.CENTER);
+        texto.setPadding(new Insets(50,0,20,0));
+        texto.setEffect( new DropShadow(BlurType.GAUSSIAN, Color.rgb(0, 0, 0, 0.3), 10, 0.6, 0.0, 0.0));
+
+        Label textoOponente = new Label("Tabuleiro do Oponente");
+        textoOponente.setId("textoOponente");
+        textoOponente.setPrefWidth(486);
+        textoOponente.setAlignment(Pos.CENTER);
+
+        Label textoJogador = new Label("Seu tabuleiro");
+        textoJogador.setId("textoJogador");
+        textoJogador.setPrefWidth(486);
+        textoJogador.setAlignment(Pos.CENTER);
+
+        HBox hBoxTextoTabuleiro = new HBox(100,textoOponente,textoJogador);
+        //hBoxTextoTabuleiro.setPadding(new Insets(0,0,0,0));
+
+        Button voltarMenu = new Button("voltar para o menu");
+        Button tutorial = new Button("tutorial");
+
+        HBox hBoxBotao = new HBox(10,tutorial,voltarMenu);
+        hBoxBotao.setAlignment(Pos.CENTER);
+        hBoxTextoTabuleiro.setPadding(new Insets(-50,0,0,0));
+
+        VBox vBox = new VBox(50,texto,hBoxTextoTabuleiro,hboxTabuleiro,hBoxBotao);
+        raiz.setCenter(vBox);
+
+        //ActionEvents para quando o usuário clicar nos botões de baixo:
+        tutorial.setOnAction(actionEvent -> {
+            comoJogar();
+        });
+
+        voltarMenu.setOnAction(actionEvent -> {
+
+            try {
+                trocaParaMenu(actionEvent);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+        });
 
         return raiz;
     }
 
-    // atualmente é utilizada para o computador realizar sua jogada.
-    private void movimentoDoOponente() {
-        while (turnoInimigo) {
-
-            // o computador escolhe uma celula aleatória
-            int x = random.nextInt(10);
-            int y = random.nextInt(10);
-
-            // pega a celula escolhida e verifica se ela já foi atirada
-            Celula celula = tabuleiroJogador.getCelula(x, y);
-            if (celula.tomouTiro)
-                continue;
-
-            celula.atirarNaCelula();
-
-            // verifica os tabuleiros do inimigo
-            if (tabuleiroJogador.quantidadeNavios == 0) {
-                System.out.println("Você Perdeu!");
-                System.exit(0);
-            }
-
-            turnoInimigo = false;
-        }
-    }
 
     // função que envia as coordenadas do navio do jogador para o oponente.
-    public void enviarNavio(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
+    public synchronized void enviarNavio(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
 
         Dados dado = new Dados( 3, naviosParaColocarOponente, isVertical, x, y);
         cliente.enviarDados(dado);
     }
 
     // função que recebe as coordenadas do navio do oponente e coloca no tabuleiro dele.
-    public void receberNavioOponente(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
-        Celula celula = tabuleiroOponente.getCelula(x,y);
-        if (tabuleiroOponente.colocarNavio(new Navio(naviosParaColocarOponente, isVertical), celula.x, celula.y)) {
-            if (--naviosParaColocarOponente == 0) {
-                oponentePronto = true;
-                inicarJogo();
-            }
+    public synchronized void receberNavioOponente(int naviosParaColocarOponente,boolean isVertical, int x, int y) {
+        System.out.println("navio recebido com sucesso!");
+
+        int finalNaviosParaColocarOponente = naviosParaColocarOponente;
+
+        Platform.runLater(() -> {
+            Celula celula = tabuleiroOponente.getCelula(x,y);
+            tabuleiroOponente.colocarNavio(new Navio(finalNaviosParaColocarOponente, isVertical), celula.x, celula.y);
+        });
+
+        if (--naviosParaColocarOponente == 0) {
+            oponentePronto = true;
+            inicarJogo();
             System.out.println("Navio colocado com sucesso.");
         }
+
     }
 
-    public void enviarTiro(int x, int y) {
+
+    public synchronized  void enviarTiro(int x, int y) {
         Dados dado = new Dados(4, x, y);
         cliente.enviarDados(dado);
         System.out.println("tiro enviado com sucesso!");
     }
 
-    public void receberTiroDoOponente(int x, int y) {
+    public synchronized  void receberTiroDoOponente(int x, int y) {
         System.out.println("Tiro recebido com sucesso");
-        Celula celula = tabuleiroJogador.getCelula(x,y);
-        celula.atirarNaCelula();
+
+        Platform.runLater(() -> {
+            Celula celula = tabuleiroJogador.getCelula(x,y);
+            celula.atirarNaCelula();
+            texto.setText("É o seu turno");
+        });
+        turnoInimigo = false;
     }
 
+    public synchronized  void enviarDerrota() {
+        Dados dado = new Dados(5,"você perdeu!");
+        cliente.enviarDados(dado);
+        System.out.println("Derrota enviada com sucesso!");
+    }
 
-    public void receberCliente(ClientNetwork cliente) {
+    public synchronized  void receberDerrota() {
+
+        tituloAlertaVitoria = "Derrota";
+        textoAlertaVitoria = "Você perdeu!";
+        Platform.runLater(() -> {
+            jogadorGanhou();
+        });
+    }
+
+    public synchronized  void receberCliente(ClientNetwork cliente) {
         this.cliente = cliente;
+    }
+
+    public void comoJogar() {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle("Tutorial");
+        alerta.setHeaderText("Como jogar batalha naval:");
+        alerta.setContentText(" Primeiramente começe a partida colocando seus navios,"
+                + " clique no seu tabuleiro para coloca-los. Botão esquerdo coloca o navio na vertical"
+                +" e o botão direito coloca o navio na horizontal."
+                +"Você e o seu oponente ambos começam com 5 navios e perde quem tiver todos os navios afundados primeiro."
+                +"\n Quando a partida começar, você deverá escolher um quadrado do tabuleiro inimigo para atirar."
+                +"Se houver um navio naquele o, ele ficará vermelho, caso não exista nenhum navio, ele ficará preto."
+                +"Após o seu movimento, será o turno do oponente e você deverá esperar ele realizar o turno dele para proseguir.");
+
+
+        // customização da janela de saída
+        DialogPane dialogPane = alerta.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("estilo.css").toExternalForm());
+        dialogPane.getStyleClass().add("myDialog");
+
+        // adicionar ícone na janela de saída
+        Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+        Image icone = new Image("icone.png");
+        stage.getIcons().add(icone);
+
+        // caso o usuário aperte ok no alerta, o programa será fechado junto com o servidor/cliente.
+        if(alerta.showAndWait().get() == ButtonType.OK){
+
+        }
+    }
+
+    public void trocaParaMenu(ActionEvent evento) throws IOException, InterruptedException {
+        cliente.close();
+        Parent root = FXMLLoader.load(Main.class.getResource("view.fxml"));
+        Stage palco = (Stage)((Node)evento.getSource()).getScene().getWindow();
+        Scene cena = new Scene(root);
+        palco.setScene(cena);
+        palco.show();
     }
 
     private void inicarJogo() {
@@ -164,7 +274,13 @@ public class BatalhaNavalCliente extends Application {
         if (jogadorPronto && oponentePronto){
             System.out.println("O jogo começou!");
             mensagem = "A partida começou!";
+
+            texto.setText(mensagem);
             terminouColocarNavios = true;
+        } else if(jogadorPronto) {
+            mensagem = "Espere seu oponente terminar de colar os navios!";
+            turnoInimigo = true;
+            texto.setText(mensagem);
         }
 
     }
@@ -193,6 +309,31 @@ public class BatalhaNavalCliente extends Application {
             palco.close();
         }
 
+    }
+
+    public void jogadorGanhou() {
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle(tituloAlertaVitoria);
+        alerta.setHeaderText(textoAlertaVitoria);
+
+        // customização da janela de saída
+        DialogPane dialogPane = alerta.getDialogPane();
+        dialogPane.getStylesheets().add(
+                getClass().getResource("estilo.css").toExternalForm());
+        dialogPane.getStyleClass().add("myDialog");
+
+        // adicionar ícone na janela de saída
+        Stage stage = (Stage) alerta.getDialogPane().getScene().getWindow();
+        Image icone = new Image("icone.png");
+        stage.getIcons().add(icone);
+
+        // caso o usuário aperte ok no alerta, o programa será fechado junto com o servidor/cliente.
+        if(alerta.showAndWait().get() == ButtonType.OK || alerta.showAndWait().get() == ButtonType.CANCEL){
+
+            Stage palco = (Stage)texto.getScene().getWindow();
+            System.out.println("Programa terminado com sucesso.");
+            palco.close();
+        }
     }
 
     @Override

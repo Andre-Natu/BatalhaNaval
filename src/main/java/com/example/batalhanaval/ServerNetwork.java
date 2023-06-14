@@ -56,11 +56,10 @@ public class ServerNetwork implements Runnable {
     }
 
     private void tick() {
-        if (errors >= 10) {
-            incapazDeComunicarComOponente = true;
+        if (errors >= 5 ) {
+            close();
+            return;
         }
-
-        if (!incapazDeComunicarComOponente) {
             try {
                 if (entradaObjeto != null) {
                     Dados dados = receberDados();
@@ -87,6 +86,9 @@ public class ServerNetwork implements Runnable {
                         case 4:
                             batalhaNavalServidor.receberTiroDoOponente(dados.x, dados.y);
                             break;
+                        case 5:
+                            System.out.println("Derrota recebida com sucesso.");
+                            batalhaNavalServidor.receberDerrota();
                     }
 
                 }
@@ -94,7 +96,6 @@ public class ServerNetwork implements Runnable {
                 e.printStackTrace();
                 errors++;
             }
-        }
     }
 
     private void escutarPorPedidosDeServidor() {
@@ -145,7 +146,7 @@ public class ServerNetwork implements Runnable {
             if (entradaObjeto != null) {
                 entradaObjeto.close();
             }
-            System.out.println("A thread foi encerrada com sucesso");
+            System.out.println("Servidor foi encerrado com sucesso");
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -158,9 +159,9 @@ public class ServerNetwork implements Runnable {
             enviarObjeto.writeObject(dados);
             enviarObjeto.flush();
             System.out.println("Tamanho navio:" + dados.naviosParaColocarOponente + "Posição x:"
-                    + dados.x + "Posição y:" + dados.y + "É vertical:" + dados.isVertical);
+                    + dados.x + "Posição y: " + dados.y + "É vertical: " + dados.isVertical);
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Não foi possível mandar a informação, tentando novamente...");
             errors++;
         }
     }
@@ -176,7 +177,7 @@ public class ServerNetwork implements Runnable {
                 return null;
             }
         } catch (IOException e) {
-            System.out.println(e);
+            System.out.println("Não foi possível receber a informação, tentando novamente...");
             errors++;
             return null;
         } catch (ClassNotFoundException e) {

@@ -65,7 +65,7 @@ public class ControllerBatalhaNaval {
 
         if(servidor != null) {
             BatalhaNavalServidor batalhaNavalServidor = new BatalhaNavalServidor();
-            cena = new Scene(batalhaNavalServidor.criarConteudo());
+            cena = new Scene(batalhaNavalServidor.criarConteudo(palco));
 
             servidor.setBatalhaNavalServidor(batalhaNavalServidor);
             batalhaNavalServidor.receberServidor(servidor);

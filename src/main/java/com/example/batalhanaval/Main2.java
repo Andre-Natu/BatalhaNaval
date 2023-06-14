@@ -38,8 +38,8 @@ public class Main2 extends Application {
 
         Menu menu = new Menu();
 
-        File musicpath = new File(this.getClass().getResource("musica1.wav").toURI());
-        menu.tocarMusica(musicpath);
+       // File musicpath = new File(this.getClass().getResource("musica1.wav").toURI());
+       // menu.tocarMusica(musicpath);
 
         String css = this.getClass().getResource("estilo.css").toExternalForm();
         cena.getStylesheets().add(css);

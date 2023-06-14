@@ -211,7 +211,7 @@
 .dialog-pane > .content.label {
    -fx-padding: 0.5em 0.5em 0.5em 0.5em;
    -fx-background-color: transparent;
-   -fx-text-fill:black;
+   -fx-text-fill:white;
    -fx-font-size:15.0px;
 }
 
@@ -226,19 +226,16 @@
   -fx-font-size:20.0px;
 }
 
+#textoOponente {
+    -fx-font-size: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.6, 0.0, 0.0);
 
-/* Costumization of Buttons
-.dialog-pane .button{
-   -fx-background-color:black;
-   -fx-text-fill:white;
-   -fx-wrap-text: true;
-   -fx-effect: dropshadow( three-pass-box, blue, 10.0, 0.0, 0.0, 0.0);
-   -fx-cursor:hand;
- }
+}
+#textoJogador {
+    -fx-font-size: 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0.6, 0.0, 0.0);
+}
 
-.dialog-pane .button:hover{
-  -fx-background-color:white;
-  -fx-text-fill:black;
-  -fx-font-weight:bold;
- }
-*/
+#tabuleiro {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 10, 0.6, -3.0, 3.0);
+}
