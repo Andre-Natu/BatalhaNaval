@@ -1,12 +1,15 @@
 # BatalhaNaval
 Um projeto em Javafx sobre batalha naval
 
-Coisas a implementar prioridade máxima:
- - Integrar todo o sistema de batalha Naval com o projeto principal.
+Estado do projeto:
+ Funciona perfeitamente bem, porém existe um bug no final 
+que tenta enviar arquivos quando a coneção é encerrada. Não
+consegui descobrir porquê isto acontece, mas isso não afeta o
+programa em nenhuma forma, apenas mostra um erro quando o 
+programa é fechado.
 
-Coisas a implementar se der tempo:
+Coisas que não foram implementadas:
  - Botão para silenciar/parar a música
- - Fechar o programa termina todas as threads abertas
- - adicionar algumas condições e verificações do ip
+ - adicionar algumas condições e verificações do ip e nickName
  - colocar monitores/semáforos no projeto
- - Deixar o projeto mais bonito(eu queria muito ter tempo pra poder fazer isso :()
+ - Deixar o projeto mais bonito(não tive tempo :/ )
